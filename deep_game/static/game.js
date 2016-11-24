@@ -113,6 +113,7 @@ function generate_data(){
 $('document').ready(function(){
 
   var direction = '';
+  var ai = false;
 
 
   $.get('/board/state', function(data){
@@ -154,8 +155,17 @@ $('document').ready(function(){
   $("#reset").click(function(){
     $.get('/board/reset', function(board){
       $("#score").text("Score: " + board.score)
-      update_board(board);
     })
+  })
+
+  $("#ai").click(function(){
+    if($(this).attr('class') == "button-primary"){
+      $(this).removeClass('button-primary')
+      ai = false
+    } else{
+      $(this).addClass('button-primary')
+      ai = true
+    }
   })
 
 })

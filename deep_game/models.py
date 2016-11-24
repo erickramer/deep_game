@@ -88,7 +88,7 @@ class Circle(Particle):
 class Board(object):
 
     def __init__(self, height=400, width=600,
-                    nb_dots=10, nb_circles=1, nb_triangles=2):
+                    nb_dots=10, nb_circles=1, nb_triangles=10):
 
         self.height = height
         self.width = width
@@ -100,6 +100,8 @@ class Board(object):
 
     def reset(self):
         self.score = 0
+        self.scored = False
+        self.won = False
         self.alive = True
 
         self._dot_count = 0
@@ -121,21 +123,24 @@ class Board(object):
 
     def _add_dot(self):
         pos = np.random.rand(2) * [self.width, self.height]
-        vel = np.random.rand(2) * [10, 10]
+        theta = np.random.rand()*2*np.pi
+        vel = np.array([10*np.cos(theta), 10*np.sin(theta)])
         dot = Dot(self._dot_count, self.max_pos, pos=pos, vel=vel, r=3)
         self._dots[self._dot_count] = dot
         self._dot_count += 1
 
     def _add_triangle(self):
         pos = np.random.rand(2) * [self.width, self.height]
-        vel = np.random.rand(2) * [10, 10]
+        theta = np.random.rand()*2*np.pi
+        vel = np.array([10*np.cos(theta), 10*np.sin(theta)])
         triangle = Triangle(self._triangle_count, self.max_pos, pos=pos, vel=vel, r=3)
         self._triangles[self._triangle_count] = triangle
         self._triangle_count += 1
 
     def _add_circle(self):
         pos = np.random.rand(2) * [self.width, self.height]
-        vel = np.random.rand(2) * [10, 10]
+        theta = np.random.rand()*2*np.pi
+        vel = np.array([10*np.cos(theta), 10*np.sin(theta)])
         circle = Circle(self._circle_count, self.max_pos, pos=pos, vel=vel, r=10)
         self._circles[self._circle_count] = circle
         self._circle_count += 1
@@ -148,16 +153,21 @@ class Board(object):
             if Particle.collided(circle, triangle):
                 self.alive = False
 
+        self.scored = False
         for dot in self._dots.values():
             if Particle.collided(circle, dot):
                 self.score += 1
+                self.scored = True
                 del self._dots[dot.name]
 
                 self._add_dot()
-                if self.score % 5 == 0:
-                    if self._triangle_count < 20:
-                        self._add_triangle()
+                # if self.score % 5 == 0:
+                #     if self._triangle_count < 10:
+                #         self._add_triangle()
 
+                if self.score >= 20:
+                    self.won = True
+                    self.alive = False
 
     def update(self, ctrls=None):
         self._detect_collisions()
